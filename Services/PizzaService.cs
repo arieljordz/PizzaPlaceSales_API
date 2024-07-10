@@ -19,22 +19,33 @@ namespace PizzaPlaceSales_API.Services
             this.configuration = configuration;
         }
 
-        public async Task<List<Pizza>> GetPizzasAsync()
+        public async Task<(List<Pizza> Pizzas, int TotalCount)> GetPizzasAsync(int page, int pageSize)
         {
-            return await db.Pizzas.ToListAsync();
+            int skip = (page - 1) * pageSize;
+
+            var data = await db.Pizzas
+                                 .OrderBy(x => x.Id)
+                                 .Skip(skip)
+                                 .Take(pageSize)
+                                 .ToListAsync();
+
+            var totalCount = await db.Pizzas.CountAsync();
+
+            return (data, totalCount);
         }
 
         public async Task<Pizza> GetPizzaByIdAsync(int id)
         {
             return await db.Pizzas.FindAsync(id);
         }
-        public async Task<ResultDTO> ImportPizzasAsync(string filePath)
+
+        public async Task<ResultDTO> ImportPizzasAsync(IFormFile file)
         {
             ResultDTO result = new ResultDTO();
 
             try
             {
-                using (var reader = new StreamReader(filePath))
+                using (var reader = new StreamReader(file.OpenReadStream()))
                 using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
                 {
                     var records = csv.GetRecords<PizzaDTO>().ToList();
@@ -68,7 +79,8 @@ namespace PizzaPlaceSales_API.Services
             catch (Exception ex)
             {
                 result.IsSuccess = false;
-                result.ErrorMessage = ex.Message;
+                result.ErrorMessage = $"Error importing orders: {ex.Message}";
+                Console.WriteLine($"Exception: {ex.Message}");
             }
 
             return result;

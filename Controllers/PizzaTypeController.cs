@@ -20,16 +20,28 @@ namespace PizzaPlaceSales_API.Controllers
             this.service = service;
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpGet]
         [Route("GetPizzaTypes")]
-        public async Task<IActionResult> GetPizzaTypes()
+        public async Task<IActionResult> GetPizzaTypes(int page = 1, int pageSize = 10)
         {
-            var result = await service.GetPizzaTypesAsync();
-            return Ok(result);
+            var result = await service.GetPizzaTypesAsync(page, pageSize);
+
+            if (result.PizzaTypes == null || !result.PizzaTypes.Any())
+            {
+                return NoContent();
+            }
+
+            var response = new
+            {
+                Data = result.PizzaTypes,
+                TotalCount = result.TotalCount
+            };
+
+            return Ok(response);
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpGet]
         [Route("GetPizzaTypeById")]
         public async Task<IActionResult> GetPizzaTypeById(int id)
@@ -49,9 +61,14 @@ namespace PizzaPlaceSales_API.Controllers
         //[Authorize]
         [HttpPost]
         [Route("ImportPizzaTypes")]
-        public async Task<IActionResult> ImportPizzaTypes(string filePath)
+        public async Task<IActionResult> ImportPizzaTypes(IFormFile file)
         {
-            var result = await service.ImportPizzaTypesAsync(filePath);
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("File is required.");
+            }
+
+            var result = await service.ImportPizzaTypesAsync(file);
             if (result != null)
             {
                 return Ok(result);
@@ -60,7 +77,6 @@ namespace PizzaPlaceSales_API.Controllers
             {
                 return NoContent();
             }
-
         }
 
     }

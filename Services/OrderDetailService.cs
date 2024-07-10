@@ -19,23 +19,26 @@ namespace PizzaPlaceSales_API.Services
             this.configuration = configuration;
         }
 
-        public async Task<List<OrderDetail>> GetOrderDetailsAsync(int page, int pageSize)
+        public async Task<(List<OrderDetail> Orders, int TotalCount)> GetOrderDetailsAsync(int page, int pageSize)
         {
             int skip = (page - 1) * pageSize;
 
             var orders = await db.OrderDetails
-                                        .OrderBy(x => x.Id)
-                                        .Skip(skip)
-                                        .Take(pageSize)
-                                        .ToListAsync();
+                                 .OrderBy(x => x.Id)
+                                 .Skip(skip)
+                                 .Take(pageSize)
+                                 .ToListAsync();
 
-            return orders;
+            var totalCount = await db.OrderDetails.CountAsync();
+
+            return (orders, totalCount);
         }
 
         public async Task<OrderDetail> GetOrderDetailByIdAsync(int id)
         {
             return await db.OrderDetails.FindAsync(id);
         }
+
         public async Task<ResultDTO> ImportOrderDetailsAsync(IFormFile file)
         {
             ResultDTO result = new ResultDTO();

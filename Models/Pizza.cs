@@ -17,7 +17,7 @@ namespace PizzaPlaceSales_API.Models
         public string? pizza_type_id { get; set; }
 
         [Required]
-        [StringLength(1)]
+        [StringLength(10)]
         public string? size { get; set; }
 
         [Required]

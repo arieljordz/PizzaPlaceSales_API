@@ -5,7 +5,7 @@ namespace PizzaPlaceSales_API.Interface
 {
     public interface IOrderDetailService
     {
-        Task<List<OrderDetail>> GetOrderDetailsAsync(int page, int pageSize);
+        Task<(List<OrderDetail> Orders, int TotalCount)> GetOrderDetailsAsync(int page, int pageSize);
 
         Task<OrderDetail> GetOrderDetailByIdAsync(int id);
 

@@ -27,12 +27,18 @@ namespace PizzaPlaceSales_API.Controllers
         {
             var result = await service.GetOrderDetailsAsync(page, pageSize);
 
-            if (result == null)
+            if (result.Orders == null || !result.Orders.Any())
             {
                 return NoContent();
             }
 
-            return Ok(result);
+            var response = new
+            {
+                Data = result.Orders,
+                TotalCount = result.TotalCount
+            };
+
+            return Ok(response);
         }
 
         //[Authorize]
